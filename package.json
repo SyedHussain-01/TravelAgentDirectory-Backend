@@ -1,0 +1,19 @@
+{
+  "name": "traveldirectory-backend",
+  "version": "1.0.0",
+  "description": "A connection between travel agents and travelers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SyedHussain-01/TravelAgentDirectory-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SyedHussain-01/TravelAgentDirectory-Backend/issues"
+  },
+  "homepage": "https://github.com/SyedHussain-01/TravelAgentDirectory-Backend#readme"
+}

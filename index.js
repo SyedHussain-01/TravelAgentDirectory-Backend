@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 const app = express();
 
 //DB Connection
-mongoose.connect('mongodb://127.0.0.1:27017').then(()=>{
+mongoose.connect('mongodb://127.0.0.1:27017/test').then(()=>{
   console.log("DB Connected")
 }).catch((e)=>{
   console.log(e)
@@ -24,7 +24,7 @@ const insertUsers = async (name, email) => {
         name,
         email
       })
-      console.log("ss=> ", ss)  
+      console.log("ss dbbbbbb=> ", ss)  
     } catch (error) {
       console.log(error)
     }   
@@ -46,23 +46,20 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 //Routes
-
 app.get("/", (req, res) => {
   res.render("index", { heading: 'Home' });
 });
 
-app.post("/form-submit", (req, res) => {
-  console.log(req.body);
+app.post("/form-submit", async (req, res) => {
+  console.log("req=>",  req.body);
   insertUsers(req.body.name, req.body.email)
-  res.render('success')
+  res.redirect('/getUsers')
 });
 
 app.get('/getUsers', async (req,res)=>{
   const userList = await getUsers()
   console.log(userList)
-  res.json({
-    userList
-  }) 
+  res.render('success', { userList }) 
 })
 
 app.get("/getProducts", (req, res) => {

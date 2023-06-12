@@ -11,13 +11,16 @@ mongoose.connect('mongodb://127.0.0.1:27017/test').then(()=>{
   console.log(e)
 })
 
+//Schema
 const usersSchema = new mongoose.Schema({
   name:String,
   email:String
 })
 
+//Model
 const myUsers = new mongoose.model('users', usersSchema);
 
+//Functions
 const insertUsers = async (name, email) => {
     try {
       const ss = await myUsers.create({

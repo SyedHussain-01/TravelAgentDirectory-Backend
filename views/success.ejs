@@ -12,6 +12,9 @@
       <% userList.map((e)=>{ %>
       <li><%= e.name %></li>
        <% }) %>
+       <form action="/logout" method="GET">
+        <button type="submit">LOGOUT</button>
+      </form>
     </ul>
   </body>
 </html>

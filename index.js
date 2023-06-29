@@ -1,9 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const cors = require('cors')
+const cors = require("cors");
 
 const app = express();
 
@@ -19,87 +20,83 @@ mongoose
 
 //Schema
 const usersSchema = new mongoose.Schema({
-  name: String,
-  email: String,
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  pass: { type: String, required: true },
+  phone: { type: Number, required: true },
+  city: { type: String, required: false },
+  date_of_birth: { type: Date, required: false },
+  user_type: { type: Number, required: true }, // 0 -> Agent || 1 -> Traveller
 });
 
 //Model
 const myUsers = new mongoose.model("users", usersSchema);
 
 //Functions
-const insertUsers = async (name, email) => {
-  try {
-    const ss = await myUsers.create({
-      name,
-      email,
-    });
-    const payload = {
-        id:ss._id,
-        name:ss.name,
-        email:ss.email
-    }
-    const userId = jwt.sign(payload, "THIS_IS_MY_SECRET_KEY_IAD_PROJECT", {
-      expiresIn: "2hr",
-    });
-    return userId
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const getUsers = async () => {
-  try {
-    const ss = await myUsers.find();
-    return ss;
-  } catch (error) {
-    console.log(error);
-  }
+const sendResponse = (res, statusCode, data) => {
+  res.status(statusCode).json({
+    status: statusCode,
+    data: statusCode !== 400 ? data : null,
+    error: statusCode === 400 ? "Invalid Input" : null,
+  });
 };
 
 //Middlewares
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
-app.use(cors())
+app.use(cookieParser());
+app.use(cors());
 
 //Engine
 app.set("view engine", "ejs");
 
 //Routes
-app.get("/logout", (req, res)=>{
-    console.log("api called")
-    res.clearCookie('user')
-    res.redirect("/")
-})
-
-app.get("/", (req, res) => {
-  res.render("index", { heading: "Home" });
+app.post("/sign-up", async (req, res) => {
+  const { name, email, pass, phone, city, date_of_birth, user_type } = req.body;
+  try {
+    const passQuery = { pass };
+    const emailQuery = { email };
+    const combinedQuery = { $or: [passQuery, emailQuery] };
+    const data = await myUsers.find(combinedQuery);
+    if (data.length === 0) {
+      const ss = await myUsers.create({
+        name,
+        email,
+        pass,
+        phone,
+        city,
+        date_of_birth,
+        user_type,
+      });
+      sendResponse(res, 200, ss);
+    }else{
+      sendResponse(res, 400, null)
+    }
+  } catch (error) {
+    sendResponse(res, 400, null);
+  }
 });
 
-app.post("/form-submit", async (req, res) => {
-  console.log("req=>", req.body);
-  const signedUserId = insertUsers(req.body.name, req.body.email);
-  const oneDay = 24*60*60*1000
-  res.cookie('user',signedUserId,{
-    httpOnly:true,
-    expires: new Date(Date.now()+oneDay)
-  })
-  res.redirect("/getUsers");
-});
-
-app.get("/getUsers", async (req, res) => {
-  const userList = await getUsers();
-  console.log(userList[userList.length - 1]._id);
-  res.render("success", { userList });
-});
-
-app.get("/getProducts", (req, res) => {
-  const pathLocation = path.resolve();
-  // console.log(pathLocation)
-  // console.log(path.join(pathLocation,'/index.html'))
-  res.sendFile(path.join(pathLocation, "/index.html"));
+app.post("/sign-in", async (req, res) => {
+  const { email, pass } = req.body;
+  try {
+    const ss = await myUsers.find({ email, pass });
+    if (ss.length === 1) {
+      const signedId = jwt.sign(
+        { id: ss._id, name: ss.email, pass: ss.pass },
+        `${process.env.JWT_TOKEN_KEY}`,
+        { expiresIn: '15m' } 
+      );
+      res.setHeader("Authorization", `Bearer ${signedId}`);
+      sendResponse(res, 200, ss);
+    } else {
+      sendResponse(res, 400, null);
+    }
+  } catch (error) {
+    console.log(ss);
+  }
 });
 
 //Server Listenser
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
   console.log("server is listening");
 });

@@ -22,7 +22,7 @@ app.use(cors(corsOptions));
 
 //DB Connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/test")
+  .connect(process.env.MONGO_DB_CONNECTION_URL)
   .then(() => {
     console.log("DB Connected");
   })
@@ -70,6 +70,10 @@ const getRefreshToken = (ss) => {
   );
   return token;
 };
+
+const authorization = (req, res) =>{
+  
+}
 
 //Engine
 app.set("view engine", "ejs");
@@ -141,6 +145,10 @@ app.post("/auth/refresh-token", async (req, res) => {
     console.log(error);
   }
 });
+
+app.get('/agent/packages',authorization,()=>{
+
+})
 
 //Server Listenser
 app.listen(process.env.PORT, () => {

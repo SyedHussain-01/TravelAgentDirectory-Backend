@@ -8,6 +8,18 @@ const cors = require("cors");
 
 const app = express();
 
+//CORS Options
+const corsOptions = {
+  origin: 'http://localhost:3001', // Replace with the origin of your client application
+  methods: ['GET', 'POST'], // Specify the allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify the allowed headers
+}
+
+//Middlewares
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(cors(corsOptions));
+
 //DB Connection
 mongoose
   .connect("mongodb://127.0.0.1:27017/test")
@@ -41,16 +53,29 @@ const sendResponse = (res, statusCode, data) => {
   });
 };
 
-//Middlewares
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(cors());
+const getAccessToken = (ss) => {
+  const token = jwt.sign(
+    { id: ss._id, name: ss.email, pass: ss.pass },
+    `${process.env.JWT_TOKEN_KEY}`,
+    { expiresIn: "15m" }
+  );
+  return token;
+};
+
+const getRefreshToken = (ss) => {
+  const token = jwt.sign(
+    { id: ss._id, name: ss.email, pass: ss.pass },
+    `${process.env.JWT_REFRESH_TOKEN_KEY}`,
+    { expiresIn: "7d" }
+  );
+  return token;
+};
 
 //Engine
 app.set("view engine", "ejs");
 
 //Routes
-app.post("/sign-up", async (req, res) => {
+app.post("/auth/sign-up", async (req, res) => {
   const { name, email, pass, phone, city, date_of_birth, user_type } = req.body;
   try {
     const passQuery = { pass };
@@ -68,31 +93,52 @@ app.post("/sign-up", async (req, res) => {
         user_type,
       });
       sendResponse(res, 200, ss);
-    }else{
-      sendResponse(res, 400, null)
+    } else {
+      sendResponse(res, 400, null);
     }
   } catch (error) {
-    sendResponse(res, 400, null);
+    sendResponse(res, 400, { message: error });
   }
 });
 
-app.post("/sign-in", async (req, res) => {
+app.post("/auth/sign-in", async (req, res) => {
   const { email, pass } = req.body;
   try {
     const ss = await myUsers.find({ email, pass });
     if (ss.length === 1) {
-      const signedId = jwt.sign(
-        { id: ss._id, name: ss.email, pass: ss.pass },
-        `${process.env.JWT_TOKEN_KEY}`,
-        { expiresIn: '15m' } 
-      );
+      const signedId = getAccessToken(ss);
+      const refreshSignedId = getRefreshToken(ss);
       res.setHeader("Authorization", `Bearer ${signedId}`);
+      res.setHeader("Refresh_Token", `Bearer ${refreshSignedId}`);
       sendResponse(res, 200, ss);
     } else {
       sendResponse(res, 400, null);
     }
   } catch (error) {
-    console.log(ss);
+    console.log(error);
+  }
+});
+
+//When the access token will expire in the client side this api will be called to regenerate the access token
+//When refresh token will be expired, user would have to sign in again 
+app.post("/auth/refresh-token", async (req, res) => {
+  const { refresh_token } = req.body;
+  try {
+    jwt.verify(
+      refresh_token,
+      process.env.JWT_REFRESH_TOKEN_KEY,
+      (err, decoded) => {
+        if (err) {
+          sendResponse(res, 400, null);
+        } else {
+          const signedId = getAccessToken(decoded);
+          res.setHeader("Authorization", `Bearer ${signedId}`);
+          sendResponse(res, 200, { message: 'Access token regenerated' });
+        }
+      }
+    );
+  } catch (error) {
+    console.log(error);
   }
 });
 

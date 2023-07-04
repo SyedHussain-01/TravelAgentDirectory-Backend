@@ -1,9 +1,10 @@
 const mongoose = require("mongoose")
 
 const usersSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
     name: { type: String, required: true },
-    email: { type: String, required: true },
-    pass: { type: String, required: true },
+    email: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
+    pass: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
     phone: { type: Number, required: true },
     city: { type: String, required: false },
     date_of_birth: { type: Date, required: false },

@@ -18,8 +18,8 @@ const packageSchema = new mongoose.Schema({
   duration: { type: Number, required: true },
   description: { type: String, required: true },
   tour_fee: { type: String, required: true },
-  start_date: { type: Date, required: false },
-  end_date: { type: Date, required: false },
+  start_date: { type: Date, required: false, default: null },
+  end_date: { type: Date, required: false, default: null },
   images: { type: [imageSchema], required: false },
 });
 

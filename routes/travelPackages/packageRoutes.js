@@ -1,7 +1,9 @@
-const { postPackageController } = require("../../controllers/packageControllers")
+const express = require("express");
+const router = express.Router();
+const {
+  postPackageController,
+} = require("../../controllers/packageControllers");
 
-const packageRoutes = (app, baseRoute) => {
-  app.post(`${baseRoute}/post-package`, postPackageController);
-};
+router.post(`/post-package`, postPackageController);
 
-module.exports = packageRoutes;
+module.exports = router;

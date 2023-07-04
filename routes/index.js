@@ -4,10 +4,10 @@ const packageRoutes = require("./travelPackages/packageRoutes")
 const routes = (app) => {
 
   //For Authentication
-  authRoutes(app, "/auth");
+  app.use('/auth', authRoutes)
 
   //For agents posting packages
-  packageRoutes(app,"/package")
+  app.use('/package', packageRoutes)
 
 };
 

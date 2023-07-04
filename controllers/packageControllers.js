@@ -1,5 +1,5 @@
 const packages = require("../models/packageModel");
-const { sendResponse } = require("../helpers/authHelpers");
+const sendResponse = require("../helpers/sharedHelpers");
 
 const postPackageController = async (req, res) => {
   const {

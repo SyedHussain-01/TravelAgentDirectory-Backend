@@ -1,8 +1,8 @@
 const {
   getAccessToken,
-  sendResponse,
   getRefreshToken,
 } = require("../helpers/authHelpers");
+const sendResponse = require("../helpers/sharedHelpers")
 const myUsers = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const { v4: uuidV4 } = require("uuid");

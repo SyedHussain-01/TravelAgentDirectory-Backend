@@ -1,7 +1,6 @@
 const mongoose = require("mongoose")
 
 const usersSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
     pass: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },

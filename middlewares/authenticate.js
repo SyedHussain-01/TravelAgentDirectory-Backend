@@ -7,7 +7,6 @@ const authenticate = async (req, res, next) => {
     const token = authorization.split(" ")[1];
     jwt.verify(token, process.env.JWT_TOKEN_KEY, (err, decoded) => {
       if (err) {
-        console.log("err=> ", err);
         sendResponse(res, 400, {
           message: "Token rejected",
         });

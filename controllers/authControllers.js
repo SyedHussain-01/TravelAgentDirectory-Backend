@@ -5,15 +5,11 @@ const {
 const sendResponse = require("../helpers/sharedHelpers")
 const myUsers = require("../models/userModel");
 const jwt = require("jsonwebtoken");
-const { v4: uuidV4 } = require("uuid");
-
-const id = uuidV4();
 
 const signupController = async (req, res) => {
   const { name, email, pass, phone, city, date_of_birth, user_type } = req.body;
   try {
     const ss = await myUsers.create({
-      id,
       name,
       email,
       pass,

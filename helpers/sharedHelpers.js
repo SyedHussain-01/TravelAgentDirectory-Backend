@@ -1,8 +1,4 @@
 const sendResponse = (res, statusCode, data) => {
-  if (data && data._id) {
-    data = data.toObject();
-    delete data._id;
-  }
   res.status(statusCode).json({
     status: statusCode,
     data: statusCode !== 400 ? data : null,

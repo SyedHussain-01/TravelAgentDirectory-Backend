@@ -1,18 +1,21 @@
 const {
   getAccessToken,
   getRefreshToken,
+  encryptPassword,
+  decryptPassword,
 } = require("../helpers/authHelpers");
-const sendResponse = require("../helpers/sharedHelpers")
+const sendResponse = require("../helpers/sharedHelpers");
 const myUsers = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
 const signupController = async (req, res) => {
   const { name, email, pass, phone, city, date_of_birth, user_type } = req.body;
+  const hashedPass = await encryptPassword(pass);
   try {
     const ss = await myUsers.create({
       name,
       email,
-      pass,
+      pass: hashedPass,
       phone,
       city,
       date_of_birth,
@@ -20,10 +23,11 @@ const signupController = async (req, res) => {
     });
     sendResponse(res, 200, ss);
   } catch (error) {
-    if(error.keyValue){
-      const err = Object.keys(error.keyValue)
+    console.log(error);
+    if (error.keyValue) {
+      const err = Object.keys(error.keyValue);
       sendResponse(res, 400, { message: `${err[0]} already exists!!!` });
-    }else{
+    } else {
       sendResponse(res, 400, { message: `Internal Server Error` });
     }
   }
@@ -32,15 +36,24 @@ const signupController = async (req, res) => {
 const signinController = async (req, res) => {
   const { email, pass } = req.body;
   try {
-    const ss = await myUsers.find({ email, pass });
-    if (ss.length === 1) {
-      const signedId = getAccessToken(ss);
-      const refreshSignedId = getRefreshToken(ss);
-      res.setHeader("Authorization", `Bearer ${signedId}`);
-      res.setHeader("Refresh_Token", `Bearer ${refreshSignedId}`);
-      sendResponse(res, 200, ss);
+    const ss = await myUsers.findOne({ email });
+    if (ss) {
+      const result = await decryptPassword(pass, ss.pass);
+      if (!result) {
+        sendResponse(res, 400, {
+          message: "Password Incorrect",
+        });
+      } else {
+        const signedId = getAccessToken(ss);
+        const refreshSignedId = getRefreshToken(ss);
+        res.setHeader("Authorization", `Bearer ${signedId}`);
+        res.setHeader("Refresh_Token", `Bearer ${refreshSignedId}`);
+        sendResponse(res, 200, ss);
+      }
     } else {
-      sendResponse(res, 400, null);
+      sendResponse(res, 400, {
+        message: "User Not Found!!!",
+      });
     }
   } catch (error) {
     console.log(error);
@@ -55,6 +68,7 @@ const refreshTokenController = async (req, res) => {
       process.env.JWT_REFRESH_TOKEN_KEY,
       (err, decoded) => {
         if (err) {
+          console.log(err);
           sendResponse(res, 400, null);
         } else {
           const signedId = getAccessToken(decoded);

@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const sendResponse = require("./sharedHelpers");
 
 //Functions
 
@@ -20,7 +22,29 @@ const getRefreshToken = (ss) => {
   return token;
 };
 
+
+const encryptPassword = async (pass) => {
+  const saltRounds = process.env.HASH_ROUNDS
+  try {
+    const hashedPass = await bcrypt.hash(pass, saltRounds)
+    return hashedPass;
+  } catch (error) {
+    console.log("err=> ", error)
+  }
+}
+
+const decryptPassword = async (userPass, hashedPass) => {
+  try {
+    const verify = await bcrypt.compare(userPass, hashedPass)
+    return verify; 
+  } catch (error) {
+    console.log("error in verification=> ", error)
+  }
+}
+
 module.exports = {
   getAccessToken,
   getRefreshToken,
+  encryptPassword,
+  decryptPassword
 };

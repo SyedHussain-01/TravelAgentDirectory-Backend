@@ -25,9 +25,11 @@ const postPackageController = async (req, res) => {
       end_date,
       images,
     });
-    sendResponse(res, 200, ss);
+    sendResponse(res, 200, ss.toObject());
   } catch (error) {
-    sendResponse(res, 400, null);
+    sendResponse(res, 400, {
+      message: "Error in creating package"
+    });
   }
 };
 

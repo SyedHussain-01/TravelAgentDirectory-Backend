@@ -1,27 +1,37 @@
 const {
   getAccessToken,
   getRefreshToken,
-  encryptPassword,
-  decryptPassword,
+  encrypt,
+  decrypt,
 } = require("../helpers/authHelpers");
 const sendResponse = require("../helpers/sharedHelpers");
 const myUsers = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const { v4: uuidV4 } = require("uuid");
+
+const accesser = uuidV4();
 
 const signupController = async (req, res) => {
-  const { name, email, pass, phone, city, date_of_birth, user_type } = req.body;
-  const hashedPass = await encryptPassword(pass);
+  const { name, email, pass, phone, city, date_of_birth, user_type, agency_name } = req.body;
+  const hashedPass = await encrypt(pass);
   try {
+    //accesser: our generated id => real _id will not be visible in any response
+    //agency_name: to show on card => the user_name of agencies will not be visible
+    //role: it's value will never be visible in any response
+    //email: will never be visible
+    //passowrd: will never be visible
     const ss = await myUsers.create({
       name,
       email,
       pass: hashedPass,
+      accesser,
       phone,
       city,
       date_of_birth,
       user_type,
+      ...(user_type == 0 ? {agency_name} : {})
     });
-    sendResponse(res, 200, ss);
+    sendResponse(res, 200, ss.toObject());
   } catch (error) {
     console.log(error);
     if (error.keyValue) {
@@ -38,7 +48,7 @@ const signinController = async (req, res) => {
   try {
     const ss = await myUsers.findOne({ email });
     if (ss) {
-      const result = await decryptPassword(pass, ss.pass);
+      const result = await decrypt(pass, ss.pass);
       if (!result) {
         sendResponse(res, 400, {
           message: "Password Incorrect",
@@ -48,7 +58,7 @@ const signinController = async (req, res) => {
         const refreshSignedId = getRefreshToken(ss);
         res.setHeader("Authorization", `Bearer ${signedId}`);
         res.setHeader("Refresh_Token", `Bearer ${refreshSignedId}`);
-        sendResponse(res, 200, ss);
+        sendResponse(res, 200, ss.toObject());
       }
     } else {
       sendResponse(res, 400, {
@@ -69,8 +79,11 @@ const refreshTokenController = async (req, res) => {
       (err, decoded) => {
         if (err) {
           console.log(err);
-          sendResponse(res, 400, null);
+          sendResponse(res, 400, {
+            maessage: "Refresh Token not verified"
+          });
         } else {
+          console.log("dec=> ", decoded)
           const signedId = getAccessToken(decoded);
           res.setHeader("Authorization", `Bearer ${signedId}`);
           sendResponse(res, 200, { message: "Access token regenerated" });

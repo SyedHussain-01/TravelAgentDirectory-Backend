@@ -15,6 +15,10 @@ const signupController = async (req, res) => {
   const { name, email, pass, phone, city, date_of_birth, user_type, agency_name } = req.body;
   const hashedPass = await encrypt(pass);
   try {
+    const checkAccesser = await myUsers.findOne({ accesser })
+    if(checkAccesser){
+      accesser = uuidV4();
+    }
     const ss = await myUsers.create({
       name,
       email,

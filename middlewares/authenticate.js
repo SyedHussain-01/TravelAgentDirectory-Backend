@@ -9,7 +9,6 @@ const authenticate = async (req, res, next) => {
     name,
     user_type:type
   }
-  console.log("authorization=> ", authorization)
   if (authorization) {
     const token = authorization.split(" ")[1];
     jwt.verify(token, process.env.JWT_TOKEN_KEY, (err, decoded) => {
@@ -19,9 +18,6 @@ const authenticate = async (req, res, next) => {
         });
       } else {
         const { _id, name, user_type } = decoded
-        console.log(decoded)
-        console.log("token details=> ", _id, name, user_type)
-        console.log("query details=> ", userObj.id, userObj.name, userObj.user_type)
         if(_id === userObj.id & name === userObj.name & user_type == userObj.user_type){
           req.user = decoded;
           next();

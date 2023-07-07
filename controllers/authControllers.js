@@ -15,11 +15,6 @@ const signupController = async (req, res) => {
   const { name, email, pass, phone, city, date_of_birth, user_type, agency_name } = req.body;
   const hashedPass = await encrypt(pass);
   try {
-    //accesser: our generated id => real _id will not be visible in any response
-    //agency_name: to show on card => the user_name of agencies will not be visible
-    //role: it's value will never be visible in any response
-    //email: will never be visible
-    //passowrd: will never be visible
     const ss = await myUsers.create({
       name,
       email,
@@ -83,7 +78,6 @@ const refreshTokenController = async (req, res) => {
             maessage: "Refresh Token not verified"
           });
         } else {
-          console.log("dec=> ", decoded)
           const signedId = getAccessToken(decoded);
           res.setHeader("Authorization", `Bearer ${signedId}`);
           sendResponse(res, 200, { message: "Access token regenerated" });

@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 //Functions
 
 const getAccessToken = (ss) => {
-  console.log("ss at=> ", ss)
   const token = jwt.sign(
     { _id: ss._id, name: ss.name, user_type: ss.user_type },
     `${process.env.JWT_TOKEN_KEY}`,
@@ -14,7 +13,6 @@ const getAccessToken = (ss) => {
 };
 
 const getRefreshToken = (ss) => {
-  console.log("ss rt=> ", ss)
   const token = jwt.sign(
     { _id: ss._id, name: ss.name, user_type: ss.user_type },
     `${process.env.JWT_REFRESH_TOKEN_KEY}`,

@@ -6,7 +6,7 @@ const sendResponse = (res, statusCode, data) => {
     })
   }
   res.status(statusCode).json({
-    data: statusCode !== 400 ? data : null,
+    data: statusCode !== 400 ? { count: data.length, data} : null,
     error: statusCode === 400 ? (data ? data : "Internal Server Error") : null,
   });
 };

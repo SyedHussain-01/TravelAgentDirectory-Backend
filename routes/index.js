@@ -1,5 +1,6 @@
 const authRoutes = require("./authentication/authRoutes")
 const packageRoutes = require("./travelPackages/packageRoutes")
+const agentRoutes = require('./travelAgents/agentRoutes')
 
 const routes = (app) => {
 
@@ -8,6 +9,9 @@ const routes = (app) => {
 
   //For agents posting packages
   app.use('/package', packageRoutes)
+
+  //For retrieving agents
+  app.use('/agents', agentRoutes)
 
 };
 

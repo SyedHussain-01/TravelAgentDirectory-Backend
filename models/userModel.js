@@ -4,7 +4,6 @@ const usersSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
     pass: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
-    accesser: { type: String, required: true, unique: true, collation: { locale: 'en', strength: 2 }, },
     phone: { type: Number, required: true },
     agency_name: { type: String, required: false, unique: true, collation: { locale: 'en', strength: 2 }, },
     city: { type: String, required: false, default: null },
